@@ -38,14 +38,16 @@ for(let i = 0; i < gameProps.mineCount;) {
 
 function checkCell(tableCell) {
   tableCell.onclick = null;
-  if (gameProps.gridMap[tableCell.id].tip === 0) {
-    tableCell.innerText = "";
-  } else if (gameProps.gridMap[tableCell.id].isMine) {
+  let id = parseInt(tableCell.id);
+  if (gameProps.gridMap[id].isMine) {
+    // innerText = "";
     window.alert("Booooom!!!");
+  } else if (gameProps.gridMap[id].tip === 0) {
+    clearRegion(id);
   } else {
     tableCell.innerText = "";
     tableCell.onclick = null;
-    gameProps.gridMap[tableCell.id].clear = true;
+    gameProps.gridMap[id].clear = true;
 
     if (gameProps.gridMap.size === gameProps.mineCount)
       window.alert("!!!!! Vitória !!!!!");
@@ -68,4 +70,50 @@ for (let i = 0; i < gameProps.gridHeight; i++) {
     else if (gameProps.gridMap[id].tip === 0) tableCell.innerText = "#";
     else tableCell.innerText = gameProps.gridMap[id].tip;
   } 
+}
+
+function clearRegion(cellId) {
+  let cells = [];         // An array to store cell id's to clear
+  cells.push(parseInt(cellId));
+  // window.alert(`function clearRegion:\nValue ${cellId} added to array cells.`);
+  let completed = true;   // !MAYBE UNECESSARY!
+  let i = 0;
+  
+  do {
+    // Auxiliary coordinates of a square that expands around a point
+    let x1 = Math.floor(cells[i] % gameProps.gridBase);
+    let x2 = x1;
+    let y1 = Math.floor(cells[i] / gameProps.gridHeight);
+    let y2 = y1;
+    if (x1 !== 0) --x1; // Top border
+    if (y1 !== 0) --y1; // Left border
+    if (x2 !== 9) ++x2; // Right border
+    if (y2 !== 9) ++y2; // Bottom border
+    // window.alert(`function clearRegion:\nSquare coordinates defined.\nTL: (${x1},${y1});  BR: (${x2},${y2})`);
+
+    // Run through the borders of the square
+    // The x value is meant to check left and right squares around the center
+    for (row = y1, x = x1; row <= y2; row += y2 - y1, x = x2) {
+      for (col = x1; col <= x2; col++) {
+        let id = row * gameProps.gridBase + col;
+        // window.alert(`function clearRegion:\nInside for loop.\nId: ${id}`);
+        if (!gameProps.gridMap[id].isMine && gameProps.gridMap[id].tip === 0 &&
+            !cells.includes(id)) {
+          cells.push(id);
+          // window.alert(`function clearRegion:\nInsert element ${id} to array cells.\nArray length: ${cells.length}.\nArray: ${cells.toString()}`);
+        }
+      }
+      // Checks the left square on the first run, then the right square
+      id = (y1 + 1) * gameProps.gridBase + x;
+      if (!gameProps.gridMap[id].isMine && gameProps.gridMap[id].tip === 0 &&
+          !cells.includes(id))
+        cells.push(id);
+    }
+    i++;
+  } while (i < cells.length)
+
+  cells.forEach((i) => {
+    let tableCell = document.getElementsByTagName("td")[i].innerText = "";
+  });
+  // window.alert(`function clearRegion:\nLeaving function...`);
 }
