@@ -45,11 +45,12 @@ function checkCell(tableCell) {
   } else if (gameProps.gridMap[id].tip === 0) {
     clearRegion(id);
   } else {
-    tableCell.innerText = "";
+    // tableCell.innerText = "";
     tableCell.onclick = null;
-    gameProps.gridMap[id].clear = true;
+    tableCell.classList.remove("normal");
+    tableCell.innerText = gameProps.gridMap[id].tip;
 
-    if (gameProps.gridMap.size === gameProps.mineCount)
+    if (gameProps.gridMap.length === gameProps.mineCount)
       window.alert("!!!!! Vitória !!!!!");
   }
 }
@@ -65,55 +66,64 @@ for (let i = 0; i < gameProps.gridHeight; i++) {
     let id = i * gameProps.gridBase + j;
     tableCell.id = id;
     tableCell.onclick = () => checkCell(tableCell);
+    tableCell.classList.add("normal");
 
-    if (gameProps.gridMap[id].isMine) tableCell.innerText = "X";
-    else if (gameProps.gridMap[id].tip === 0) tableCell.innerText = "#";
-    else tableCell.innerText = gameProps.gridMap[id].tip;
+    // if (gameProps.gridMap[id].isMine) tableCell.innerText = "X";
+    // else if (gameProps.gridMap[id].tip === 0) tableCell.innerText = "#";
+    // else tableCell.innerText = gameProps.gridMap[id].tip;
   } 
 }
 
 function clearRegion(cellId) {
-  let cells = [];         // An array to store cell id's to clear
-  cells.push(parseInt(cellId));
-  // window.alert(`function clearRegion:\nValue ${cellId} added to array cells.`);
-  let completed = true;   // !MAYBE UNECESSARY!
+  let coldCells = [];         // An array to store cell id's to clear
+  let hotCells = [];          // An array to store cells that are near mines that will be revealed
+  coldCells.push(parseInt(cellId));
   let i = 0;
   
   do {
     // Auxiliary coordinates of a square that expands around a point
-    let x1 = Math.floor(cells[i] % gameProps.gridBase);
+    let x1 = Math.floor(coldCells[i] % gameProps.gridBase);
     let x2 = x1;
-    let y1 = Math.floor(cells[i] / gameProps.gridHeight);
+    let y1 = Math.floor(coldCells[i] / gameProps.gridHeight);
     let y2 = y1;
     if (x1 !== 0) --x1; // Top border
     if (y1 !== 0) --y1; // Left border
     if (x2 !== 9) ++x2; // Right border
     if (y2 !== 9) ++y2; // Bottom border
-    // window.alert(`function clearRegion:\nSquare coordinates defined.\nTL: (${x1},${y1});  BR: (${x2},${y2})`);
 
     // Run through the borders of the square
     // The x value is meant to check left and right squares around the center
     for (row = y1, x = x1; row <= y2; row += y2 - y1, x = x2) {
       for (col = x1; col <= x2; col++) {
         let id = row * gameProps.gridBase + col;
-        // window.alert(`function clearRegion:\nInside for loop.\nId: ${id}`);
-        if (!gameProps.gridMap[id].isMine && gameProps.gridMap[id].tip === 0 &&
-            !cells.includes(id)) {
-          cells.push(id);
-          // window.alert(`function clearRegion:\nInsert element ${id} to array cells.\nArray length: ${cells.length}.\nArray: ${cells.toString()}`);
-        }
+        if (gameProps.gridMap[id].isMine) continue;
+        else if (gameProps.gridMap[id].tip === 0 && !coldCells.includes(id))
+          coldCells.push(id);
+        else if (!hotCells.includes(id))
+          hotCells.push(id);
       }
       // Checks the left square on the first run, then the right square
       id = (y1 + 1) * gameProps.gridBase + x;
-      if (!gameProps.gridMap[id].isMine && gameProps.gridMap[id].tip === 0 &&
-          !cells.includes(id))
-        cells.push(id);
+      if (!gameProps.gridMap[id].isMine) continue;
+      else if (gameProps.gridMap[id].tip === 0 && !coldCells.includes(id))
+        coldCells.push(id);
+      else if (!hotCells.includes(id))
+        hotCells.push(id);
     }
     i++;
-  } while (i < cells.length)
+  } while (i < coldCells.length)
+  
+    hotCells.forEach(i => {
+      let tableCell = document.getElementsByTagName("td")[i];
+      tableCell.innerText = gameProps.gridMap[i].tip;
+      tableCell.onclick = null;
+      tableCell.classList.remove("normal");
+    });
 
-  cells.forEach((i) => {
-    let tableCell = document.getElementsByTagName("td")[i].innerText = "";
+  coldCells.forEach(i => {
+    let tableCell = document.getElementsByTagName("td")[i];
+    tableCell.innerText = "";
+    tableCell.onclick = null;
+    tableCell.classList.remove("normal");
   });
-  // window.alert(`function clearRegion:\nLeaving function...`);
 }

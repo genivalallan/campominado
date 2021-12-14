@@ -10,6 +10,16 @@ table#minefield>tbody>tr>td {
   text-align: center;
 }
 
-table#minefield>tbody>tr>td:hover {
+table#minefield>tbody>tr>td.normal {
+  background-color: lightsteelblue;
+}
+
+table#minefield>tbody>tr>td:hover,
+table#minefield>tbody>tr>td.normal:hover,
+table#minefield>tbody>tr>td.mine:hover {
   background-color: lightslategrey;
+}
+
+table#minefield>tbody>tr>td.mine {
+  background-color: orangered;
 }
