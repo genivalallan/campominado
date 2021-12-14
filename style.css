@@ -1,0 +1,13 @@
+table#minefield {
+  border: 2px solid black;
+}
+
+table#minefield>tbody>tr>td {
+  border: 1px solid grey;
+  width: 25px;
+  text-align: center;
+}
+
+table#minefield>tbody>tr>td:hover {
+  background-color: lightslategrey;
+}
