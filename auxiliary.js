@@ -9,15 +9,10 @@ function setRegion(gameProps, center, callbackFunc) {
   let sq = new Square(parseInt(center), gameProps.gridBase, gameProps.gridHeight);
 
   // Run through the borders of the square
-  // The x value is meant to check left and right squares around the center
-  for (let row = sq.y1, x = sq.x1; row <= sq.y2; row += sq.y2 - sq.y1, x = sq.x2) {
+  for (let row = sq.y1; row <= sq.y2; row++) {
     for (let col = sq.x1; col <= sq.x2; col++) {
       let cell = row * game.gridBase + col;
-      callbackFunc(cell);
+      if (cell !== center) callbackFunc(cell);
     }
-    // x is the left square on the first run, then the right
-    let cell = (sq.y1+1) * game.gridBase + x;
-    // May happen that the center is also the border, skip in this case
-    if (cell !== center) callbackFunc(cell);
   }
 }
