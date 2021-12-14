@@ -4,7 +4,9 @@ table#minefield {
 
 table#minefield>tbody>tr>td {
   border: 1px solid grey;
-  width: 25px;
+  font-size: 1em;
+  width: 30px;
+  height: 30px;
   text-align: center;
 }
 
