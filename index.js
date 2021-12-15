@@ -41,19 +41,25 @@ function checkCell(tableCell) {
   tableCell.onclick = null;
   let id = parseInt(tableCell.id);
   if (game.gridMap[id].isMine) {
-    // innerText = "";
-    tableCell.classList.remove("normal");
-    tableCell.classList.add("mine");
-    tableCell.innerText = "X";
-    window.alert("Booooom!!!");
+    terminate(false);
+    return;
   } else if (game.gridMap[id].tip === 0) {
     clearEmpty(id);
   } else {
     tableCell.classList.remove("normal");
     tableCell.innerText = game.gridMap[id].tip;
+    game.gridMap[id].clear = true;
   }
+
+  let clear = 0;
+  for (let i = 0; i < game.gridSize; i++)
+    if (game.gridMap[i].clear) clear++;
+
+  if (game.gridSize - clear === game.mineCount)
+    terminate();
 }
 
+// Clear the empty cells connected to each other
 function clearEmpty(cellId) {
   let coldCells = [];         // An array to store cell id's to clear
   let hotCells = [];          // An array to store cell id's near mines to be revealed
@@ -62,27 +68,45 @@ function clearEmpty(cellId) {
   
   do {
     setRegion(game,coldCells[i], id => {
-      if (!game.gridMap[id].isMine && game.gridMap[id].tip === 0 &&
-          !coldCells.includes(id))
+      if (game.gridMap[id].isMine) /* Do nothing */;
+      else if (game.gridMap[id].tip === 0 && !coldCells.includes(id))
         coldCells.push(id);
-      else if (!game.gridMap[id].isMine && !hotCells.includes(id))
+      else if (!hotCells.includes(id) && !coldCells.includes(id))
         hotCells.push(id);
     });
     
     i++;
   } while (i < coldCells.length)
   
+  coldCells.forEach(i => {
+    game.gridMap[i].clear = true;
+    let tableCell = document.getElementsByTagName("td")[i];
+    tableCell.onclick = null;
+    tableCell.classList.remove("normal");
+  });
+  
   hotCells.forEach(i => {
+    game.gridMap[i].clear = true;
     let tableCell = document.getElementsByTagName("td")[i];
     tableCell.innerText = game.gridMap[i].tip;
     tableCell.onclick = null;
     tableCell.classList.remove("normal");
   });
+}
 
-  coldCells.forEach(i => {
-    let tableCell = document.getElementsByTagName("td")[i];
-    tableCell.innerText = "";
-    tableCell.onclick = null;
-    tableCell.classList.remove("normal");
-  });
+function terminate(win = true) {
+  let tableCells = document.getElementsByTagName("td");
+  for (let i = 0; i < game.gridMap.length; i++) {
+    tableCells[i].onclick = null;
+    if (game.gridMap[i].isMine) {
+      tableCells[i].classList.remove("normal");
+      tableCells[i].classList.add("mine");
+      tableCells[i].innerText = "X";
+    }
+  }
+  if (win) {
+
+  } else {
+    
+  }
 }
