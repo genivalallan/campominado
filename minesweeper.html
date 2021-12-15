@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="bootstrap.css">
   <link rel="stylesheet" href="style.css">
   <title>Campo Minado</title>
   <script src="./constructors.js" defer></script>
@@ -11,8 +12,37 @@
   <script src="./index.js" defer></script>
 </head>
 <body>
-  <h2>Campo Minado</h2>
-  <div>
+  <h2 class="text-center text-white bg-primary m-2 p-2">Campo Minado</h2>
+  <div class="d-flex flex-row justify-content-center" id="panel">
+    <div class="input-group mb-3 mx-2" id="level-form">
+      <span class="input-group-text">Level</span>
+      <select id="level-select" class="form-select">
+        <option value="easy" selected>Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <div class="input-group mb-3 mx-2" id="size-form">
+      <span class="input-group-text">Grid Size</span>
+      <input type="number" id="base-input" class="form-control" value="10" min="10" max="25" disabled>
+      <input type="number" id="height-input" class="form-control" value="10" min="10" max="15" disabled>
+    </div>
+    <div class="input-group mb-3 mx-2" id="mines-form">
+      <span class="input-group-text">Mines</span>
+      <input type="number" id="mines-input" class="form-control" value="15" disabled>
+    </div>
+    <div class="input-group mb-3 mx-2" id="start">
+      <button class="btn btn-primary form-control" id="start-btn">Start</button>
+    </div>
+  </div>
+  <div class="d-flex justify-content-center">
+    <div class="input-group mb-3" id="timer-form">
+      <span class="input-group-text">⏱</span>
+      <input class="form-control text-center" type="text" value="000" id="timer-field" disabled>
+    </div>
+  </div>
+  <div class="d-flex justify-content-center">
     <table id="minesweeper"></table>
   </div>
 </body>

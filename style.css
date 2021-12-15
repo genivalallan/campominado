@@ -23,3 +23,23 @@ table#minesweeper>tbody>tr>td.mine:hover {
 table#minesweeper>tbody>tr>td.mine {
   background-color: orangered;
 }
+
+#level-form {
+  width: 200px;
+}
+
+#size-form {
+  width: 250px;
+}
+
+#mines-form {
+  width: 170px;
+}
+
+#start {
+  width: 150px;
+}
+
+#timer-form {
+  width: 200px;
+}
