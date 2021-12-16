@@ -1,45 +1,113 @@
+// Globals
+const levelSelect = document.getElementById("level-select");
+const baseInput = document.getElementById("base-input");
+const heightInput = document.getElementById("height-input");
+const minesInput = document.getElementById("mines-input");
+const startBtn = document.getElementById("start-btn");
+const timerField = document.getElementById("timer-field");
+const minesTable = document.getElementById("minesweeper");
+let game = null;
 
-let game = new GameProps();
+levelSelect.onchange = levelSelector;
+startBtn.onclick = start;
 
-// Initialize cells state
-for (let i = 0; i < game.gridSize; i++) {
-  game.gridMap[i] = new CellState();
-}
-
-// Set random locations
-for(let i = 0; i < game.mineCount;) {
-  let location = Math.floor(Math.random() * game.gridSize);
-  // If it already exists, try another one
-  if(game.gridMap[location].isMine) continue;
-  else game.gridMap[location].isMine = true;
+// Update the panel when select element changes
+function levelSelector() {
+  let option = levelSelect.value;
   
-  // Increase the counter of the cells around the mine
-  setRegion(game, location, id => {
-    if (!game.gridMap[id].isMine)
-      game.gridMap[id].tip++;
-  });
-  i++;
-}
-
-// Set minesweeper table
-const mineSweeper = document.getElementById("minesweeper");
-if (!mineSweeper) {
-  console.log("ERROR: minesweeper element not found!");
-}
-for (let i = 0; i < game.gridHeight; i++) {
-  let tableRow = mineSweeper.insertRow();
-  for (let j = 0; j < game.gridBase; j++) {
-    let tableCell = tableRow.insertCell();
-    tableCell.id = i * game.gridBase + j;
-    tableCell.onclick = () => checkCell(tableCell);
-    tableCell.classList.add("normal");
+  switch (option) {
+    case "easy":
+      baseInput.disabled = true;
+      heightInput.disabled = true;
+      minesInput.disabled = true;
+      baseInput.value = 10;
+      heightInput.value = 10;
+      minesInput.value = 15;
+      break;
+    case "medium":
+      baseInput.disabled = true;
+      heightInput.disabled = true;
+      minesInput.disabled = true;
+      baseInput.value = 15;
+      heightInput.value = 10;
+      minesInput.value = 30;
+      break;
+    case "hard":
+      baseInput.disabled = true;
+      heightInput.disabled = true;
+      minesInput.disabled = true;
+      baseInput.value = 20;
+      heightInput.value = 15;
+      minesInput.value = 50;
+      break;
+    case "custom":
+      baseInput.disabled = false;
+      heightInput.disabled = false;
+      minesInput.disabled = false;
+    break;
+    default:
+      break;
   }
 }
 
-// onClick event handler
-function checkCell(tableCell) {
+function start() {
+  let gridBase = parseInt(baseInput.value);
+  let gridHeight = parseInt(heightInput.value);
+  let mineCount = parseInt(minesInput.value);
+
+  if (isNaN(gridBase) || isNaN(gridHeight) || isNaN(mineCount)) {
+    window.alert("ERROR!\nCannot start the game.\nInvalid arguments.");
+    return;
+  }
+  if (gridBase < 10 || gridBase > 20 || gridHeight < 10 || gridHeight > 15) {
+    window.alert("ERROR!\nCannot start the game. Argumens out of range.\n{10 <= Length <= 20} {10 <= Height <= 15}");
+    return;
+  }
+
+  // Clear table element
+  while (minesTable.firstChild) minesTable.removeChild(minesTable.firstChild);
+  // Reset game properties
+  game = new GameProps(gridBase, gridHeight, mineCount);
+
+  // Initialize cells state
+  for (let i = 0; i < game.gridSize; i++) game.gridMap[i] = new CellState();
+
+  // Set random locations
+  for (let i = 0; i < mineCount; ) {
+    let location = Math.floor(Math.random() * game.gridSize);
+    // If it already exists, try another one
+    if (game.gridMap[location].isMine) continue;
+    else game.gridMap[location].isMine = true;
+    
+    // Increase the counter on the cells around the mine
+    setRegion(game, location, (id) => {
+      if (!game.gridMap[id].isMine) game.gridMap[id].tip++;
+    });
+    i++;
+  }
+
+  // Create minesweeper table
+  if (!minesTable) console.log("ERROR: minesweeper element not found!");
+  for (let i = 0; i < gridHeight; i++) {
+    let tableRow = minesTable.insertRow();
+    for (let j = 0; j < gridBase; j++) {
+      let tableCell = tableRow.insertCell();
+      tableCell.id = i * gridBase + j;
+      tableCell.onclick = () => cellClick(tableCell);
+      tableCell.classList.add("normal");
+    }
+  }
+}
+
+// Handle clicks on table cells
+function cellClick(tableCell) {
   tableCell.onclick = null;
   let id = parseInt(tableCell.id);
+  if (isNaN(id) || id < 0 || id > game.gridSize) {
+    console.log("function cellClick received an invalid argument.");
+    return;
+  }
+
   if (game.gridMap[id].isMine) {
     terminate(false);
     return;
@@ -57,6 +125,22 @@ function checkCell(tableCell) {
 
   if (game.gridSize - clear === game.mineCount)
     terminate();
+}
+
+// Show game results and terminate the game
+function terminate(win = true) {
+  let tableCells = document.getElementsByTagName("td");
+  for (let i = 0; i < game.gridMap.length; i++) {
+    tableCells[i].onclick = null;
+    if (game.gridMap[i].isMine) {
+      tableCells[i].classList.remove("normal");
+      tableCells[i].classList.add("mine");
+      tableCells[i].innerText = "X";
+    }
+  }
+  if (win) {
+  } else {
+  }
 }
 
 // Clear the empty cells connected to each other
@@ -94,19 +178,21 @@ function clearEmpty(cellId) {
   });
 }
 
-function terminate(win = true) {
-  let tableCells = document.getElementsByTagName("td");
-  for (let i = 0; i < game.gridMap.length; i++) {
-    tableCells[i].onclick = null;
-    if (game.gridMap[i].isMine) {
-      tableCells[i].classList.remove("normal");
-      tableCells[i].classList.add("mine");
-      tableCells[i].innerText = "X";
-    }
+// Aplly a call back function on a 3x3 cells region excluding the center cell
+// callbackFunc: receives an integer parameter with the number of a cell
+function setRegion(gameProps, center, callbackFunc) {
+  if (!(gameProps instanceof GameProps) || typeof callbackFunc !== "function") {
+    console.log("ERROR: function setRegion received invalid parameters!");
+    return;
   }
-  if (win) {
 
-  } else {
-    
+  let sq = new Square(parseInt(center), gameProps.gridBase, gameProps.gridHeight);
+
+  // Run through the borders of the square
+  for (let row = sq.y1; row <= sq.y2; row++) {
+    for (let col = sq.x1; col <= sq.x2; col++) {
+      let cell = row * game.gridBase + col;
+      if (cell !== center) callbackFunc(cell);
+    }
   }
 }
