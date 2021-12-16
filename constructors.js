@@ -18,7 +18,7 @@ function CellState(isMine = false, tip = 0) {
 function Square(cellNo, gridBase, gridHeight) {
   this.x1 = Math.floor(cellNo % gridBase);
   this.x2 = this.x1;
-  this.y1 = Math.floor(cellNo / gridHeight);
+  this.y1 = Math.floor(cellNo / gridBase);
   this.y2 = this.y1;
   if (this.x1 !== 0) --this.x1;           if (this.y1 !== 0) --this.y1;             // Top-Left corner
   if (this.x2 !== gridBase-1) ++this.x2;  if (this.y2 !== gridHeight-1) ++this.y2;  // Bottom-Right corner
