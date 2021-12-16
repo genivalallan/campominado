@@ -1,4 +1,5 @@
 // Globals
+const title = document.getElementById("title");
 const levelSelect = document.getElementById("level-select");
 const baseInput = document.getElementById("base-input");
 const heightInput = document.getElementById("height-input");
@@ -64,6 +65,9 @@ function start() {
     return;
   }
 
+  // Reset title bar
+  title.classList.remove("bg-danger", "bg-success");
+  title.classList.add("bg-primary");  
   // Clear table element
   while (minesTable.firstChild) minesTable.removeChild(minesTable.firstChild);
   // Reset game properties
@@ -129,6 +133,7 @@ function cellClick(tableCell) {
 
 // Show game results and terminate the game
 function terminate(win = true) {
+  title.classList.remove("bg-primary");
   let tableCells = document.getElementsByTagName("td");
   for (let i = 0; i < game.gridMap.length; i++) {
     tableCells[i].onclick = null;
@@ -139,7 +144,9 @@ function terminate(win = true) {
     }
   }
   if (win) {
+    title.classList.add("bg-success");
   } else {
+    title.classList.add("bg-danger");
   }
 }
 
