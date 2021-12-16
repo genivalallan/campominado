@@ -5,9 +5,10 @@ const baseInput = document.getElementById("base-input");
 const heightInput = document.getElementById("height-input");
 const minesInput = document.getElementById("mines-input");
 const startBtn = document.getElementById("start-btn");
-const timerField = document.getElementById("timer-field");
+const timer = document.getElementById("timer");
 const minesTable = document.getElementById("minesweeper");
 let game = null;
+let timerId = null;
 
 levelSelect.onchange = levelSelector;
 startBtn.onclick = start;
@@ -67,7 +68,11 @@ function start() {
 
   // Reset title bar
   title.classList.remove("bg-danger", "bg-success");
-  title.classList.add("bg-primary");  
+  title.classList.add("bg-primary");
+  // Reset timer
+  if (timerId) clearInterval(timerId);
+  timerId = null;
+  timer.value = "000";
   // Clear table element
   while (minesTable.firstChild) minesTable.removeChild(minesTable.firstChild);
   // Reset game properties
@@ -105,6 +110,7 @@ function start() {
 
 // Handle clicks on table cells
 function cellClick(tableCell) {
+  if (!timerId) timerId = setInterval(updateTimer, 1000);
   tableCell.onclick = null;
   let id = parseInt(tableCell.id);
   if (isNaN(id) || id < 0 || id > game.gridSize) {
@@ -133,6 +139,7 @@ function cellClick(tableCell) {
 
 // Show game results and terminate the game
 function terminate(win = true) {
+  clearInterval(timerId);
   title.classList.remove("bg-primary");
   let tableCells = document.getElementsByTagName("td");
   for (let i = 0; i < game.gridMap.length; i++) {
@@ -202,4 +209,10 @@ function setRegion(gameProps, center, callbackFunc) {
       if (cell !== center) callbackFunc(cell);
     }
   }
+}
+
+// Update elapsed time
+function updateTimer() {
+  game.elapsedTime++;
+  timer.value = game.elapsedTime.toString().padStart(3, "0");
 }
