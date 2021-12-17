@@ -11,7 +11,7 @@ let game = null;
 let timerId = null;
 
 levelSelect.onchange = levelSelector;
-startBtn.onclick = start;
+startBtn.onclick = startGame;
 
 // Update the panel when select element changes
 function levelSelector() {
@@ -52,7 +52,7 @@ function levelSelector() {
   }
 }
 
-function start() {
+function startGame() {
   let gridBase = parseInt(baseInput.value);
   let gridHeight = parseInt(heightInput.value);
   let mineCount = parseInt(minesInput.value);
@@ -62,24 +62,15 @@ function start() {
     return;
   }
   if (gridBase < 10 || gridBase > 20 || gridHeight < 10 || gridHeight > 15) {
-    window.alert("ERROR!\nCannot start the game. Argumens out of range.\n{10 <= Length <= 20} {10 <= Height <= 15}");
+    window.alert(
+      "ERROR!\nCannot start the game. Argumens out of range.\n{10 <= Length <= 20} {10 <= Height <= 15}"
+    );
     return;
   }
 
-  // Reset title bar
-  title.classList.remove("bg-danger", "bg-success");
-  title.classList.add("bg-primary");
-  // Reset timer
-  if (timerId) clearInterval(timerId);
-  timerId = null;
-  timer.value = "000";
-  // Clear table element
-  while (minesTable.firstChild) minesTable.removeChild(minesTable.firstChild);
   // Reset game properties
   game = new GameProps(gridBase, gridHeight, mineCount);
-
-  // Initialize cells state
-  for (let i = 0; i < game.gridSize; i++) game.gridMap[i] = new CellState();
+  resetGame();
 
   // Set random locations
   for (let i = 0; i < mineCount; ) {
@@ -87,12 +78,12 @@ function start() {
     // If it already exists, try another one
     if (game.gridMap[location].isMine) continue;
     else game.gridMap[location].isMine = true;
-    
+    i++;
+
     // Increase the counter on the cells around the mine
     setRegion(game, location, (id) => {
       if (!game.gridMap[id].isMine) game.gridMap[id].tip++;
     });
-    i++;
   }
 
   // Create minesweeper table
@@ -152,8 +143,10 @@ function terminate(win = true) {
   }
   if (win) {
     title.classList.add("bg-success");
+    title.innerText = "Vitória!";
   } else {
     title.classList.add("bg-danger");
+    title.innerText = "Boooommm!";
   }
 }
 
@@ -215,4 +208,21 @@ function setRegion(gameProps, center, callbackFunc) {
 function updateTimer() {
   game.elapsedTime++;
   timer.value = game.elapsedTime.toString().padStart(3, "0");
+}
+
+function resetGame() {
+  // Reset title bar
+  title.classList.remove("bg-danger", "bg-success");
+  title.classList.add("bg-primary");
+  title.innerText = "Campo Minado";
+  // Reset timer
+  if (timerId) clearInterval(timerId);
+  timerId = null;
+  timer.value = "000";
+  // Clear table element
+  while (minesTable.firstChild) minesTable.removeChild(minesTable.firstChild);
+
+  // Initialize cells state
+  game.gridMap = [];
+  game.gridMap = Array.from({ length: game.gridSize }, () => new CellState());
 }

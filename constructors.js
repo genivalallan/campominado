@@ -4,7 +4,7 @@ function GameProps(gridBase = 10, gridHeight = 10, mineCount = 15) {
   this.gridHeight = gridHeight;             // Height of the grid
   this.gridSize = gridBase * gridHeight;    // Area of the grid
   this.mineCount = mineCount;               // Number of mines
-  this.gridMap = new Array(this.gridSize);  // State of each cell
+  this.gridMap = [];                        // State of each cell
   this.elapsedTime = 0;                     // Elapsed time
 }
 
